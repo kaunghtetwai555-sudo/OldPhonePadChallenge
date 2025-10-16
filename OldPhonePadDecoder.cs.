@@ -1,1 +1,76 @@
+public static string OldPhonePad(string input)
+{
+    if (string.IsNullOrEmpty(input))
+        return string.Empty;
+
+    // Define the keypad mapping
+    var keyMap = new Dictionary<char, char[]>
+    {
+        ['1'] = new[] { '&', '\'', '(' },
+        ['2'] = new[] { 'A', 'B', 'C' },
+        ['3'] = new[] { 'D', 'E', 'F' },
+        ['4'] = new[] { 'G', 'H', 'I' },
+        ['5'] = new[] { 'J', 'K', 'L' },
+        ['6'] = new[] { 'M', 'N', 'O' },
+        ['7'] = new[] { 'P', 'Q', 'R', 'S' },
+        ['8'] = new[] { 'T', 'U', 'V' },
+        ['9'] = new[] { 'W', 'X', 'Y', 'Z' },
+        ['0'] = new[] { ' ' }
+    };
+
+    var output = new StringBuilder();
+    char? currentDigit = null;
+    int pressCount = 0;
+
+    // Local helper method to "flush" the current digit sequence
+    void FlushGroup()
+    {
+        if (currentDigit == null || pressCount == 0)
+            return;
+
+        if (keyMap.TryGetValue(currentDigit.Value, out var letters))
+        {
+            int index = (pressCount - 1) % letters.Length;
+            output.Append(letters[index]);
+        }
+
+        currentDigit = null;
+        pressCount = 0;
+    }
+
+    foreach (char c in input)
+    {
+        if (c == '#')
+        {
+            FlushGroup();
+            break; // '#' means send (end of input)
+        }
+        else if (c == '*')
+        {
+            FlushGroup();
+            if (output.Length > 0)
+                output.Length -= 1; // backspace removes last letter
+        }
+        else if (c == ' ')
+        {
+            FlushGroup(); // pause between letters
+        }
+        else if (char.IsDigit(c))
+        {
+            if (currentDigit == c)
+            {
+                pressCount++;
+            }
+            else
+            {
+                FlushGroup();
+                currentDigit = c;
+                pressCount = 1;
+            }
+        }
+        // Ignore invalid characters
+    }
+
+    return output.ToString();
+}
 
